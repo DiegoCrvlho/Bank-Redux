@@ -1,4 +1,4 @@
-import { createStore } from "redux";
+import { combineReducers, createStore } from "redux";
 
 const initialAccount = {
   loan: 0,
@@ -9,6 +9,7 @@ const initialAccount = {
 const initialCustomer = {
   fullName: "",
   nationalId: "",
+  createdAt: "",
 };
 
 function AccountReducer(state = initialAccount, action) {
@@ -50,10 +51,12 @@ function AccountReducer(state = initialAccount, action) {
 
 function customerReducer(state = initialCustomer, action) {
   switch (action.type) {
-    case "customer/create": {
+    case "customer/createCustomer": {
       return {
         ...state,
-        fullName: action.payload,
+        fullName: action.payload.fullName,
+        nationalId: action.payload.nationalId,
+        createdAt: action.payload.createdAt,
       };
     }
     case "customer/update": {
@@ -68,29 +71,25 @@ function customerReducer(state = initialCustomer, action) {
   }
 }
 
-const store = createStore(AccountReducer);
+const rootReducer = combineReducers({
+  account: AccountReducer,
+  customer: customerReducer,
+});
+const store = createStore(rootReducer);
 
-// store.dispatch({ type: "account/deposit", payload: 500 });
+function createCustomer(fullName, nationalId) {
+  return {
+    type: "customer/createCustomer",
+    payload: { fullName, nationalId, createdAt: new Date().toISOString() },
+  };
+}
 
-// console.log(store.getState());
-
-// store.dispatch({ type: "account/withdraw", payload: 200 });
-
-// console.log(store.getState());
-
-// store.dispatch({
-//   type: "requestLoan",
-//   payload: {
-//     amount: 1000,
-//     purpose: "Personal Loan",
-//   },
-// });
-
-// console.log(store.getState());
-
-// store.dispatch({ type: "account/payloan" });
-
-// console.log(store.getState());
+function updateCustomer(fullName) {
+  return {
+    type: "customer/update",
+    payload: fullName,
+  };
+}
 
 function deposit(amount) {
   store.dispatch({ type: "account/deposit", payload: amount });
@@ -108,10 +107,14 @@ function payLoan() {
   store.dispatch({ type: "account/payloan" });
 }
 
-console.log(store.getState(deposit(500)));
+// console.log(store.getState(deposit(500)));
 
-console.log(store.getState(withdraw(200)));
+// console.log(store.getState(withdraw(200)));
 
-console.log(store.getState(requestLoan(1000, "Personal Loan")));
+// console.log(store.getState(requestLoan(1000, "Personal Loan")));
 
-console.log(store.getState(payLoan()));
+// console.log(store.getState(payLoan()));
+
+store.dispatch(createCustomer("John Doe", "1234567890"));
+
+console.log(store.getState());
